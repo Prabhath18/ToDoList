@@ -24,18 +24,6 @@ This is a simple and interactive day planner built with **HTML, CSS, and JavaScr
 
 ---
 
-## 🌐 Live Demo
-
-Coming soon with GitHub Pages...
-
----
-
-## 📸 Preview
-
-> *(Include a screenshot of your app here if you'd like)*
-
----
-
 ## 💡 Technologies Used
 
 - HTML5
