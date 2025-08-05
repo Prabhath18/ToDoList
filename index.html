@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>To-Do Day Planner</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px;
+    }
+    h1 {
+      margin-bottom: 20px;
+    }
+    #todo-form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+      max-width: 500px;
+    }
+    input[type="text"], input[type="time"] {
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      width: 100%;
+    }
+    .task-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    button {
+      padding: 10px 15px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 20px;
+      width: 100%;
+      max-width: 600px;
+    }
+    li {
+      background: white;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .done {
+      text-decoration: line-through;
+      color: gray;
+    }
+    .actions button {
+      margin-left: 5px;
+      background-color: #dc3545;
+    }
+    .actions button.edit {
+      background-color: #007bff;
+    }
+    .time {
+      font-size: 0.9em;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <h1>Daily To-Do Planner</h1>
+  <form id="todo-form">
+    <div id="task-container">
+      <div class="task-group">
+        <input type="text" class="task-input" placeholder="Task description..." required />
+        <input type="time" class="start-time" required />
+        <input type="time" class="end-time" required />
+      </div>
+    </div>
+    <button type="button" onclick="addTaskInput()">+ Add Another Task</button>
+    <button type="submit">Save All Tasks</button>
+  </form>
+  <ul id="todo-list"></ul>
+
+  <script>
+    const todoForm = document.getElementById('todo-form');
+    const taskContainer = document.getElementById('task-container');
+    const todoList = document.getElementById('todo-list');
+
+    let todos = JSON.parse(localStorage.getItem('todos')) || [];
+
+    function renderTodos() {
+      todoList.innerHTML = '';
+      todos.forEach((todo, index) => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <div>
+            <span class="${todo.completed ? 'done' : ''}">${todo.task}</span><br>
+            <span class="time">${formatTime(todo.start)} to ${formatTime(todo.end)}</span>
+          </div>
+          <div class="actions">
+            <button onclick="toggleDone(${index})">Done</button>
+            <button class="edit" onclick="editTask(${index})">Edit</button>
+            <button onclick="deleteTask(${index})">Delete</button>
+          </div>
+        `;
+        todoList.appendChild(li);
+      });
+      localStorage.setItem('todos', JSON.stringify(todos));
+    }
+
+    function formatTime(timeStr) {
+      const [hour, minute] = timeStr.split(":");
+      const h = parseInt(hour);
+      const period = h >= 12 ? "PM" : "AM";
+      const hour12 = h % 12 || 12;
+      return `${hour12}:${minute} ${period}`;
+    }
+
+    function addTaskInput() {
+      const group = document.createElement('div');
+      group.classList.add('task-group');
+      group.innerHTML = `
+        <input type="text" class="task-input" placeholder="Task description..." required />
+        <input type="time" class="start-time" required />
+        <input type="time" class="end-time" required />
+      `;
+      taskContainer.appendChild(group);
+    }
+
+    todoForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const taskInputs = document.querySelectorAll('.task-input');
+      const startTimes = document.querySelectorAll('.start-time');
+      const endTimes = document.querySelectorAll('.end-time');
+      for (let i = 0; i < taskInputs.length; i++) {
+        const task = taskInputs[i].value.trim();
+        const start = startTimes[i].value;
+        const end = endTimes[i].value;
+        if (task && start && end) {
+          todos.push({ task, start, end, completed: false });
+        }
+      }
+      renderTodos();
+      todoForm.reset();
+      taskContainer.innerHTML = `
+        <div class="task-group">
+          <input type="text" class="task-input" placeholder="Task description..." required />
+          <input type="time" class="start-time" required />
+          <input type="time" class="end-time" required />
+        </div>
+      `;
+    });
+
+    function toggleDone(index) {
+      todos[index].completed = !todos[index].completed;
+      renderTodos();
+    }
+
+    function editTask(index) {
+      const newTask = prompt('Edit the task:', todos[index].task);
+      const newStart = prompt('Edit start time (HH:MM):', todos[index].start);
+      const newEnd = prompt('Edit end time (HH:MM):', todos[index].end);
+      if (newTask && newStart && newEnd) {
+        todos[index].task = newTask;
+        todos[index].start = newStart;
+        todos[index].end = newEnd;
+        renderTodos();
+      }
+    }
+
+    function deleteTask(index) {
+      todos.splice(index, 1);
+      renderTodos();
+    }
+
+    renderTodos();
+  </script>
+</body>
+</html>
